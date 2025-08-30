@@ -327,7 +327,7 @@ class Game:
 
         self.running = True
 
-        self.load_map("01")
+        self.load_map("02")
 
         if not self.loaded:
             self.set_registers()
