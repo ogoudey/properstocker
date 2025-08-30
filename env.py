@@ -76,6 +76,7 @@ class SupermarketEnv(gym.Env):
             elif player_action == PlayerAction.TOGGLE:
                 self.unwrapped.game.toggle_cart(i)
                 self.unwrapped.game.toggle_basket(i)
+                self.unwrapped.game.toggle_box(i)
             elif player_action == PlayerAction.CANCEL:
                 self.unwrapped.game.cancel_interaction(i)
             elif player_action == PlayerAction.PICKUP:
@@ -147,6 +148,7 @@ class SinglePlayerSupermarketEnv(gym.Wrapper):
         elif player_action == PlayerAction.TOGGLE:
             self.unwrapped.game.toggle_cart(i)
             self.unwrapped.game.toggle_basket(i)
+            self.unwrapped.game.toggle_box(i)
         elif player_action == PlayerAction.CANCEL:
             self.unwrapped.game.cancel_interaction(i)
         elif player_action == PlayerAction.PICKUP:

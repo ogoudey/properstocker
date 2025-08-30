@@ -33,6 +33,10 @@ class Player:
         self.curr_cart = None
         self.curr_basket = None
 
+        # box carrying status
+        self.carried_box = None
+
+
         # player inventory
         self.render_inventory = False
 
@@ -74,6 +78,9 @@ class Player:
         if self.curr_basket is not None:
             if self.curr_basket.being_held:
                 self.curr_basket.update_position(new_position[0], new_position[1])
+        if self.carried_box is not None:
+            if self.carried_box.being_held:
+                self.carried_box.update_position(new_position[0], new_position[1])
 
     def __str__(self):
         return "Player {i}".format(i=self.player_number)

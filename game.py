@@ -1,4 +1,4 @@
-from random import uniform, choice
+from random import uniform, choice, randint
 
 import pygame
 import config
@@ -18,7 +18,8 @@ from shelves import Shelf
 from shoppingcarts import Carts
 from baskets import Baskets
 from walls import Wall
-
+from box import Box
+from boxes import Boxes
 # from cart_state import CartState
 
 ACTION_DIRECTION = {
@@ -123,6 +124,7 @@ class Game:
             self.clock = pygame.time.Clock()
 
         self.objects = []
+        self.boxes = []
         self.carts = []
         self.baskets = []
         self.running = False
@@ -332,6 +334,7 @@ class Game:
             self.set_carts()
             self.set_baskets()
             self.set_walls()
+            self.set_boxes()
         self.set_counters()
 
         # print(self.food_list)
@@ -347,7 +350,7 @@ class Game:
                 if mode != 0 and self.num_players == 2:
                     print("**********************setting shopping list******************************")
                     print(self.preset_shopping_list[mode][i], self.preset_quantities[mode][i])
-                    print("**********************setting shopping list******************************")
+                    print("**********************setting shopping liast******************************")
                     player.pre_set_shopping_list(self.preset_shopping_list[mode][i], self.preset_quantities[mode][i])
                 elif mode!=0 and self.num_players > 2:
                     player.pre_set_shopping_list(self.preset_shopping_list[2][1], self.preset_quantities[2][1])
@@ -472,7 +475,7 @@ class Game:
             player.curr_basket = None
         else:
             # Player can't pick up the cart if they're holding food
-            if player.holding_food is None:
+            if player.holding_food is None and player.carried_box is None:
                 # check if player is holding onto cart (should prob restructure bc this is ugly)
                 for basket in self.baskets:
                     if basket.can_toggle(player) and not basket.being_held:
@@ -481,6 +484,25 @@ class Game:
                         basket.last_held = player
                         basket.being_held = True
                         break
+                        
+    def toggle_box(self, player_index):
+
+        player = self.players[player_index]
+        if player.left_store:
+            return
+        if player.carried_box is not None:
+            print("Dropping box")
+            player.carried_box.being_held = False
+            player.carried_box = None
+        elif player.holding_food is None and player.curr_basket is None:
+            for box in self.boxes:
+                if box.can_toggle(player) and not box.being_held:
+                    # Ensure you can't pick up a cart someone else is currently holding
+                    player.carried_box = box
+                    box.last_held = player
+                    box.being_held = True
+                    break
+
 
     def nop(self, player):
         self.players[player].stand_still()
@@ -528,6 +550,29 @@ class Game:
             # iterating the stage the player is in, for walking animation purposes
             player.iterate_stage(anim_to_advance)
 
+        if player.carried_box is not None:
+            prev_direction = player.direction
+            box = player.carried_box
+            box.set_direction(direction)
+            box.update_position(player.position[0] + current_speed * x1, player.position[1] + current_speed * y1)
+            if self.collide(box, box.position[0], box.position[1]) or self.hits_wall(box, box.position[0], box.position[1]):
+                # make the cart bounce if it was already facing the right way and it can do so
+                new_position = player.position
+                if direction == prev_direction:
+                    bounce_position = (player.position[0] - BOUNCE_COEFFICIENT * current_speed * x1,
+                                       player.position[1] - BOUNCE_COEFFICIENT * current_speed * y1)
+                    if not self.collide(box, bounce_position[0], bounce_position[1]) \
+                            and not self.hits_wall(cart, bounce_position[0], bounce_position[1]):
+                        new_position = bounce_position
+                        current_speed = - 1 * BOUNCE_COEFFICIENT * current_speed
+
+                # Undo the turning of the cart bc we're canceling the action
+                box.set_direction(prev_direction)
+                box.update_position(new_position[0], new_position[1])
+                if direction != prev_direction:
+                    return
+            
+            
         # If the player is holding a cart, this keeps track of whether the cart would collide with something.
         if player.curr_cart is not None:
             prev_direction = player.direction
@@ -737,9 +782,24 @@ class Game:
         self.objects.append(baskets)
         
     def set_walls(self):
-        walls = []
         for y in list(range(0, 17)) + list(range(20, 24)):
             self.objects.append(Wall(19.75, y))
+            
+    def set_boxes(self):
+        for y in range(3, 15):
+            num_boxes = choice([1, 2, 3, 4])
+            if num_boxes == 1:
+                box = Box(15, y)
+                self.boxes.append(box)
+                self.objects.append(box)
+            else:
+                stacked_boxes = []
+                for i in range(0, num_boxes):
+                    box = Box(15, y)
+                    box.in_stack = True
+                    self.objects.append(box)
+                    stacked_boxes.append(box)
+                self.objects.append(Boxes(stacked_boxes[0].position[0], stacked_boxes[0].position[1], stacked_boxes))      
 
     def pickup(self, i, food):
         food = self.food_list[food]
