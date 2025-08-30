@@ -762,7 +762,7 @@ class Game:
         return None
 
     def set_shelf(self, shelf_filename, food_filename, string_name, food_price, x_position, y_position):
-        quantity = 12
+        quantity = 0
         food = food_filename
         # if not self.headless:
         #     food = pygame.transform.scale(pygame.image.load(food_filename),
