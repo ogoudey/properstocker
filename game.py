@@ -17,6 +17,7 @@ from player import Player
 from shelves import Shelf
 from shoppingcarts import Carts
 from baskets import Baskets
+from walls import Wall
 
 # from cart_state import CartState
 
@@ -223,6 +224,10 @@ class Game:
             player.bought_holding_food = player_dict['bought_holding_food']
             self.players.append(player)
 
+        for wall_dict in obs['walls']:
+            pos = wall_dict['position']
+            wall = Wall(pos[0], pos[1])
+        
         for basket_dict in obs['baskets']:
             # JUMP
             pos = basket_dict['position']
