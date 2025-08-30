@@ -224,10 +224,7 @@ class Game:
             player.bought_holding_food = player_dict['bought_holding_food']
             self.players.append(player)
 
-        for wall_dict in obs['walls']:
-            pos = wall_dict['position']
-            wall = Wall(pos[0], pos[1])
-        
+            
         for basket_dict in obs['baskets']:
             # JUMP
             pos = basket_dict['position']
@@ -334,6 +331,7 @@ class Game:
             self.set_shelves()
             self.set_carts()
             self.set_baskets()
+            self.set_walls()
         self.set_counters()
 
         # print(self.food_list)
@@ -737,6 +735,11 @@ class Game:
     def set_baskets(self):
         baskets = Baskets(3.5, 18.5)
         self.objects.append(baskets)
+        
+    def set_walls(self):
+        walls = []
+        for y in list(range(0, 17)) + list(range(20, 24)):
+            self.objects.append(Wall(19.75, y))
 
     def pickup(self, i, food):
         food = self.food_list[food]
