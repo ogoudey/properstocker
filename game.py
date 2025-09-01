@@ -786,9 +786,7 @@ class Game:
     def set_walls(self):
         for y in list(range(0, 17)) + list(range(20, 24)):
             self.objects.append(Wall(19.75, y))
-    
-    
-            
+   
     def set_boxes(self):
         for y in range(3, 15):
             food = choice(self.food_list)

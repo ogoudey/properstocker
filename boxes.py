@@ -21,10 +21,7 @@ class Boxes(InteractiveObject):
         self.render_offset_y = 0.0
         
         self.id = random.randint(1000, 9999)
-        
-        
-        
-        
+                
     def __str__(self):
         return "a stack of boxes #" + str(self.id)
 
@@ -77,13 +74,9 @@ class Boxes(InteractiveObject):
                     box.stack = None
                     self.width = 0
                     self.position = [0, 0]
-                    #game.objects.remove(self)
-
-                    
             # Player is holding a basket; return it
             else:
                 if len(self.boxes) < self.stack_height_limit:
-                    print("Stack height:", len(self.boxes))
                     self.set_interaction_message(player, "You put back the box of " + str(player.carried_box.food_contents["amount"]) + " " + player.carried_box.food_contents["food"])
                     self.boxes.append(player.carried_box)
                     player.carried_box.being_held = False
