@@ -139,13 +139,13 @@ class Shelf(InteractiveObject):
                 else:
                     self.set_interaction_message(player, "The basket is full! The food won't fit.")
         if player.carried_box is not None:
-
+            stock_delta = 0
             empty = False
             if player.carried_box.food_contents["food"] == self.string_type:
                 stock_delta = min(player.carried_box.food_contents["amount"], self.capacity - self.item_quantity)
                 self.item_quantity += stock_delta
             else:
-                # NORM
+                # NORM - stick throw the items on but its a violation.
                 pass
 
             player.carried_box.food_contents["amount"] -= stock_delta

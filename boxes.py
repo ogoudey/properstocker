@@ -35,7 +35,7 @@ class Boxes(InteractiveObject):
             box.render(screen, camera)
             i += 1
         if len(self.boxes) > 1:                          
-            gap = 0.33
+            gap = 0.345
             for i in range(0, len(self.boxes)):
                 image = pygame.transform.scale(pygame.image.load("images/box/box.png"),
                                                    (int(.5 * config.SCALE), int(.5 * config.SCALE)))
@@ -83,6 +83,7 @@ class Boxes(InteractiveObject):
             # Player is holding a basket; return it
             else:
                 if len(self.boxes) < self.stack_height_limit:
+                    print("Stack height:", len(self.boxes))
                     self.set_interaction_message(player, "You put back the box of " + str(player.carried_box.food_contents["amount"]) + " " + player.carried_box.food_contents["food"])
                     self.boxes.append(player.carried_box)
                     player.carried_box.being_held = False

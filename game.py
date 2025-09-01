@@ -128,6 +128,7 @@ class Game:
         self.stacks = [] # used to store pointers to stacks
         self.carts = []
         self.baskets = []
+        self.shelves = []
         self.running = False
         self.map = []
         self.camera = Camera()
@@ -785,18 +786,22 @@ class Game:
     def set_walls(self):
         for y in list(range(0, 17)) + list(range(20, 24)):
             self.objects.append(Wall(19.75, y))
+    
+    
             
     def set_boxes(self):
         for y in range(3, 15):
+            food = choice(self.food_list)
+            #["apples", "oranges", "banana", "strawberry", "raspberry", "milk", "chocolate milk", "strawberry milk", "sausage", "steak", "chicken", "ham", "brie cheese", "swiss cheese", "cheese wheel", "garlic", "leek", "red bell pepper", "carrot", "lettuce", "avocado", "broccoli", "cucumber", "yellow bell pepper", "onion", "prepared foods", "fresh fish"]
             num_boxes = choice([1, 2, 3, 4])
             if num_boxes == 1:
-                box = Box(17, y)
+                box = Box(21, y, food=food)
                 self.boxes.append(box)
                 self.objects.append(box)
             else:
                 stacked_boxes = []
                 for i in range(0, num_boxes):
-                    box = Box(17, y)
+                    box = Box(21, y, food=food)
                     box.in_stack = True
                     self.objects.append(box)
                     stacked_boxes.append(box)
@@ -847,6 +852,7 @@ class Game:
         self.objects.append(shelf)
         self.food_list.append(string_name)
         self.food_images[string_name] = food_filename
+        self.shelves.append(shelf)
 
     def get_interactivity_data(self):
         # TODO(dkasenberg) will need to fix this

@@ -14,7 +14,7 @@ class Box(CartLike):
     def __str__(self):
         return "box"+str(self.id)+" of "+str(self.food_contents["amount"]) + " " + self.food_contents["food"]
         
-    def __init__(self, x_position, y_position, direction=Direction.NORTH):
+    def __init__(self, x_position, y_position, direction=Direction.NORTH, food="ham", amount=10):
         super(Box, self).__init__(x_position, y_position, owner=None, capacity=999)
         self.width = 0
         self.height = 0
@@ -25,8 +25,8 @@ class Box(CartLike):
         self.in_stack = False
         self.stack = None
         self.food_contents = {
-                                "food": choice(["steak", "chicken", "ham"]),
-                                "amount": randint(6, 12)
+                                "food": food,
+                                "amount": amount
                              }
         self.id = randint(1000,9999)
 
@@ -86,6 +86,7 @@ class Box(CartLike):
         elif player.carried_box is not None:
             new_stack = Boxes(self.position[0], self.position[1], [self, player.carried_box])
             self.set_interaction_message(player, "You created a stack of boxes.")
+            self.in_stack = True
             player.carried_box.being_held = False
             player.carried_box.in_stack = True
             self.stack = new_stack
@@ -101,7 +102,7 @@ class Box(CartLike):
                 player.carried_box = self
                 self.being_held = True
                 self.in_stack = False
-                self.set_interaction_message(player, "You picked up a box of" + str(self.food_contents["amount"]) + " " + self.food_contents["food"])
+                self.set_interaction_message(player, "You picked up a box of " + str(self.food_contents["amount"]) + " " + self.food_contents["food"])
                 
     def can_toggle(self, player):
         print("Player direction:", player.direction)
