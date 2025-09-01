@@ -3,7 +3,7 @@ from objects import InteractiveObject
 from helper import obj_collision, can_interact_default, overlap
 import pygame
 import config
-
+import random
 
 class Boxes(InteractiveObject):
     def __init__(self, x_position, y_position, boxes):
@@ -13,18 +13,20 @@ class Boxes(InteractiveObject):
         self.stack_height_limit = 5
 
         self.width = 0.15
-        self.height = 0.15 + 0.15*len(self.boxes)
+        self.height = 0.15
 
         self.images = []
 
         self.render_offset_x = -0.25
-        self.render_offset_y = 0.05
+        self.render_offset_y = 0.0
+        
+        self.id = random.randint(1000, 9999)
         
         
         
         
     def __str__(self):
-        return "a stack of boxes"
+        return "a stack of boxes #" + str(self.id)
 
     def render(self, screen, camera):
         i = 0
@@ -33,7 +35,7 @@ class Boxes(InteractiveObject):
             box.render(screen, camera)
             i += 1
         if len(self.boxes) > 1:                          
-            gap = 0.15
+            gap = 0.33
             for i in range(0, len(self.boxes)):
                 image = pygame.transform.scale(pygame.image.load("images/box/box.png"),
                                                    (int(.5 * config.SCALE), int(.5 * config.SCALE)))
@@ -44,8 +46,9 @@ class Boxes(InteractiveObject):
         return can_interact_default(self, player, range=.5)
 
     def collision(self, obj, x_position, y_position):
-        return overlap(self.position[0], self.position[1], self.width, self.height,
+        col = overlap(self.position[0], self.position[1], self.width, self.height,
                        x_position, y_position, obj.width, obj.height)
+        return col
 
     def interact(self, game, player):
         if self.get_interaction_stage(player) == 0:
@@ -58,8 +61,8 @@ class Boxes(InteractiveObject):
                             player.carried_box = box
                             box.being_held = True
                             box.in_stack = False
-                            self.height = 0.15 + 0.15*len(self.boxes)
-                            self.set_interaction_message(player, "You picked up box. Press c to let go and pick up.")
+                            box.stack = None
+                            self.set_interaction_message(player, "You picked up a box of " + str(box.food_contents["amount"]) + " " + box.food_contents["food"])
                     else:
                         self.set_interaction_message(player, "This stack is full!")                       
                 else:
@@ -67,18 +70,25 @@ class Boxes(InteractiveObject):
                     player.carried_box = box
                     box.being_held = True
                     box.in_stack = False
+                    box.stack = None
+                    self.set_interaction_message(player, "You picked up a box of " + str(box.food_contents["amount"]) + " " + box.food_contents["food"])
+                    box = self.boxes.pop() # the last box
+                    box.in_stack = False
+                    box.stack = None
+                    self.width = 0
+                    self.position = [0, 0]
+                    #game.objects.remove(self)
+
                     
-                    self.boxes[0].in_stack = False
-                    del self # no more stack
             # Player is holding a basket; return it
             else:
                 if len(self.boxes) < self.stack_height_limit:
-                    self.set_interaction_message(player, "You put the box back.")
+                    self.set_interaction_message(player, "You put back the box of " + str(player.carried_box.food_contents["amount"]) + " " + player.carried_box.food_contents["food"])
                     self.boxes.append(player.carried_box)
                     player.carried_box.being_held = False
                     player.carried_box.in_stack = True
                     player.carried_box = None                    
-                    self.height = 0.15 + 0.15*len(self.boxes)
+                    
                 else:
                     self.set_interaction_message(player, "This stack is full!")
             

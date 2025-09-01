@@ -4,7 +4,7 @@ from helper import can_interact_default, overlap
 from enums.direction import Direction
 import pygame
 from boxes import Boxes
-from random import randint
+from random import randint, choice
 class Box(CartLike):
 
 
@@ -12,7 +12,7 @@ class Box(CartLike):
         return "Box"
 
     def __str__(self):
-        return "box"+str(self.id)
+        return "box"+str(self.id)+" of "+str(self.food_contents["amount"]) + " " + self.food_contents["food"]
         
     def __init__(self, x_position, y_position, direction=Direction.NORTH):
         super(Box, self).__init__(x_position, y_position, owner=None, capacity=999)
@@ -23,6 +23,11 @@ class Box(CartLike):
         self.render_offset_y = 0.05
         self.being_held = False
         self.in_stack = False
+        self.stack = None
+        self.food_contents = {
+                                "food": choice(["steak", "chicken", "ham"]),
+                                "amount": randint(6, 12)
+                             }
         self.id = randint(1000,9999)
 
     def set_direction(self, direction):
@@ -66,6 +71,8 @@ class Box(CartLike):
             self.position[1] = y_position+0.2
             
     def collision(self, obj, x_position, y_position):
+        if self.in_stack:
+            return 0
         if not self.being_held:
             return overlap(self.position[0], self.position[1], self.width, self.height,
                         x_position, y_position, obj.width, obj.height)
@@ -81,23 +88,21 @@ class Box(CartLike):
             self.set_interaction_message(player, "You created a stack of boxes.")
             player.carried_box.being_held = False
             player.carried_box.in_stack = True
+            self.stack = new_stack
             player.carried_box = None
             game.objects.append(new_stack)
             
             
         else:
-            if not game.keyboard_input:
-                # TODO(dkasenberg) fix this: a socket player shouldn't have to do multiple commands to remove food
-                # from the cart.
-                # if game.selected_food in self.contents or game.selected_food in self.purchased_contents:
-                #     self.pickup(game.selected_food, player, game.food_images[game.selected_food])
-                # game.selected_food = None
-                return
+            if self.in_stack:
+                # let the stack deal with this logic
+                pass
             else:
-                self.checking_contents = True
-                game.item_select = True
-            self.set_interaction_message(player, None)
-            
+                player.carried_box = self
+                self.being_held = True
+                self.in_stack = False
+                self.set_interaction_message(player, "You picked up a box of" + str(self.food_contents["amount"]) + " " + self.food_contents["food"])
+                
     def can_toggle(self, player):
         print("Player direction:", player.direction)
         return can_interact_default(self, player)

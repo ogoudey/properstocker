@@ -125,6 +125,7 @@ class Game:
 
         self.objects = []
         self.boxes = []
+        self.stacks = [] # used to store pointers to stacks
         self.carts = []
         self.baskets = []
         self.running = False
@@ -789,17 +790,21 @@ class Game:
         for y in range(3, 15):
             num_boxes = choice([1, 2, 3, 4])
             if num_boxes == 1:
-                box = Box(15, y)
+                box = Box(17, y)
                 self.boxes.append(box)
                 self.objects.append(box)
             else:
                 stacked_boxes = []
                 for i in range(0, num_boxes):
-                    box = Box(15, y)
+                    box = Box(17, y)
                     box.in_stack = True
                     self.objects.append(box)
                     stacked_boxes.append(box)
-                self.objects.append(Boxes(stacked_boxes[0].position[0], stacked_boxes[0].position[1], stacked_boxes))      
+                stack = Boxes(stacked_boxes[0].position[0], stacked_boxes[0].position[1], stacked_boxes)
+                self.stacks.append(stack)
+                self.objects.append(stack) 
+                for box in stacked_boxes:
+                    box.stack = stack   
 
     def pickup(self, i, food):
         food = self.food_list[food]
@@ -830,12 +835,13 @@ class Game:
         return None
 
     def set_shelf(self, shelf_filename, food_filename, string_name, food_price, x_position, y_position):
+        capacity = 10
         quantity = 0
         food = food_filename
         # if not self.headless:
         #     food = pygame.transform.scale(pygame.image.load(food_filename),
         #                                   (int(.30 * config.SCALE), int(.30 * config.SCALE)))
-        shelf = Shelf(x_position, y_position, shelf_filename, food, string_name, food_price, quantity, quantity,
+        shelf = Shelf(x_position, y_position, shelf_filename, food, string_name, food_price, capacity, quantity,
                       not self.headless)
         self.food_directory[string_name] = food_price
         self.objects.append(shelf)

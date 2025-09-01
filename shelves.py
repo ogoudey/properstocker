@@ -110,7 +110,7 @@ class Shelf(InteractiveObject):
         empty = False
         if self.item_quantity == 0:
             empty = True
-        if player.curr_cart is None and player.curr_basket is None:
+        if player.curr_cart is None and player.curr_basket is None and player.carried_box is None:
             if player.holding_food is not None:
                 # check what kind of food...
                 self.set_interaction_message(player, "You put " + player.holding_food + " back on the shelf.")
@@ -127,6 +127,7 @@ class Shelf(InteractiveObject):
                     player.holding_food_image = self.food_image
                     self.set_interaction_message(player, "You picked up " + self.string_type + ".")
                     self.item_quantity -= 1
+                    empty = False
         elif player.curr_basket is None:
             self.set_interaction_message(player, "Let go of your cart to pick up food!")
         else:
@@ -137,5 +138,28 @@ class Shelf(InteractiveObject):
                     self.item_quantity -= 1
                 else:
                     self.set_interaction_message(player, "The basket is full! The food won't fit.")
+        if player.carried_box is not None:
+
+            empty = False
+            if player.carried_box.food_contents["food"] == self.string_type:
+                stock_delta = min(player.carried_box.food_contents["amount"], self.capacity - self.item_quantity)
+                self.item_quantity += stock_delta
+            else:
+                # NORM
+                pass
+
+            player.carried_box.food_contents["amount"] -= stock_delta
+
+            if player.carried_box.food_contents["amount"] < 1:
+                player.being_held = False
+                player.carried_box.position = [0,0]
+                
+                self.set_interaction_message(player, "You stocked all the " + player.carried_box.food_contents["food"] + " in the box.")
+                player.carried_box = None
+            else:
+                self.set_interaction_message(player, "You stocked all the " + player.carried_box.food_contents["food"] + " that could fit (" + str(player.carried_box.food_contents["amount"]) + " left over).")
+                
+            
+            
         if empty:
             self.set_interaction_message(player, "The shelf is empty.")
